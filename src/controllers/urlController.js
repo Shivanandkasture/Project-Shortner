@@ -30,6 +30,8 @@ const urlShortner = async function (req, res) {
 
         let longUrl = req.body.longUrl
 
+        longUrl = longUrl.trim()
+
         if (!longUrl) { res.status(400).send({ status: false, message: "Please enter longUrl" }) }
 
         // create the url code
@@ -73,7 +75,7 @@ const getUrl = async function (req, res) {
 
         const caching = await GET_ASYNC(`${req.params.urlCode}`);
 
-        //console.log(caching)
+        console.log(caching)
 
         if (caching) {
 
