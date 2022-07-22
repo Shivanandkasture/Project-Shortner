@@ -24,6 +24,7 @@ const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
 
 const baseUrl = 'http://localhost:3001'
 
+
 const urlShortner = async function (req, res) {
     try {
 
@@ -49,18 +50,13 @@ const urlShortner = async function (req, res) {
             // join the generated short code the the base url
             const shortUrl = baseUrl + '/' + urlCode
 
-            let data = {}
-            data.longUrl = longUrl;
-            data.shortUrl = shortUrl;
-            data.urlCode = urlCode
+            let data = { longUrl, shortUrl, urlCode }
 
             // invoking the Url model and create to the DB
 
             await urlModel.create(data)
 
-            let urlData = await urlModel.findOne({ longUrl, shortUrl, urlCode, }, { __v: 0, createdAt: 0, updatedAt: 0, _id: -1 })
-
-            return res.status(201).send({ status: true, data: urlData })
+            return res.status(201).send({ status: true, data: data })
         }
     }
     catch (err) {
@@ -75,12 +71,9 @@ const getUrl = async function (req, res) {
 
         if (!shortid.isValid(urlCode)) return res.status(400).send({ status: false, message: "Invalid UrlCode." })
 
-        const UrlData = await urlModel.findOne({ urlCode });
-
-        if (!UrlData) return res.status(404).send({ status: false, message: "this urlCode is not present in our database" });
-
         const caching = await GET_ASYNC(`${req.params.urlCode}`);
-        console.log(caching)
+
+        //console.log(caching)
 
         if (caching) {
 
@@ -91,7 +84,7 @@ const getUrl = async function (req, res) {
 
             if (!UrlData) return res.status(404).send({ status: false, message: "this urlCode is not present in our database" });
 
-            // console.log("UrlData:" + UrlData.longUrl)
+            // console.log( UrlData.longUrl)
 
             await SET_ASYNC(`${req.params.urlCode}`, UrlData.longUrl);
 
